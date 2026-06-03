@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>再不吃就別吃了 - 冰箱管理系統</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 20px auto; padding: 20px; background-color: #f4f7f6; }
+        h1, h2 { color: #333; }
+        .form-box { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        input { margin: 5px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 90%; max-width: 300px; }
+        button { padding: 8px 15px; background-color: #2ec4b6; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .guide-section { background-color: #f8f9fa; padding: 12px; border-radius: 6px; margin: 10px 0; border-left: 4px solid #2ec4b6; }
+        .guide-title { font-weight: bold; font-size: 14px; color: #495057; margin-bottom: 5px; }
+        .btn-quick { background-color: #ffffff; color: #00796b; border: 1px solid #b2dfdb; padding: 5px 10px; font-size: 12px; margin-right: 4px; margin-bottom: 4px; border-radius: 4px; cursor: pointer; }
+        .btn-quick:active { background-color: #e0f2f1; }
+        .btn-freeze { color: #0077b6; border-color: #90e0ef; }
+        .minus-form { display: inline-flex; align-items: center; }
+        .input-minus { width: 60px !important; margin: 0 5px 0 0; padding: 4px; text-align: center; }
+        .btn-minus { background-color: #f77f00; padding: 5px 10px; font-size: 12px; }
+        .btn-delete { background-color: #e63946; padding: 5px 10px; font-size: 12px; }
+        .btn-search { background-color: #4a4e69; width: auto; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #2ec4b6; color: white; }
+        .danger-row { background-color: #ff4d4d !important; color: white; font-weight: bold; }
+        .warning-row { background-color: #ffe3e0 !important; color: #cc0000; font-weight: bold; }
+        .search-box { display: flex; align-items: center; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <h1>🧊 「再不吃就別吃了」冰箱儀表板</h1>
+    
+    <div class="form-box">
+        <h2>➕ 新增食材資訊</h2>
+        <div class="quick-btn-group">
+            <span style="font-size: 14px; color: #666;">💡 沒有寫效期？點擊自動估算：</span><br>
+            <button type="button" class="btn-quick" onclick="setExpiryDays(2, '生鮮肉品/海鮮(冷藏)')">冷藏 (2天)</button>
+            <button type="button" class="btn-quick btn-freeze" onclick="setExpiryDays(180, '牛/豬肉排(冷凍)')">肉排冷凍 (6個月)</button>
+            <button type="button" class="btn-quick btn-freeze" onclick="setExpiryDays(60, '絞肉/海鮮(冷凍)')">絞肉/海鮮冷凍 (2個月)</button>
+        </div>
+        <div class="guide-section">
+            <div class="guide-title">🥬 蔬菜與水果類</div>
+            <button type="button" class="btn-quick" onclick="setExpiryDays(7, '葉菜類')">葉菜類 (1星期)</button>
+            <button type="button" class="btn-quick" onclick="setExpiryDays(30, '根莖類蔬菜')">根莖/高麗菜/洋蔥 (1個月)</button>
+        </div>
+        <div class="guide-section">
+            <div class="guide-title">🥛 乳品與蛋類</div>
+            <button type="button" class="btn-quick" onclick="setExpiryDays(10, '鮮乳')">鮮乳 (約10天)</button>
+            <button type="button" class="btn-quick" onclick="setExpiryDays(28, '雞蛋')">雞蛋 (約4週)</button>
+        </div>
+        <div class="guide-section">
+            <div class="guide-title">🍱 熟食與隔夜菜</div>
+            <button type="button" class="btn-quick" onclick="setExpiryDays(3, '熟食隔夜菜')">冷藏保存 (3天)</button>
+        </div>
+        <form method="POST" style="margin-top: 15px;">
+            <input type="text" name="food_name" id="food_name" placeholder="食物名稱 (可手動修改)" required><br>
+            <input type="date" name="expiry_date" id="expiry_date" required><br>
+            <input type="number" name="quantity" placeholder="數量 (如：1 或 0.5)" step="any" min="0.01" required><br>
+            <button type="submit">存入冰箱</button>
+        </form>
+    </div>
+
+    <div class="form-box">
+        <h2>🔍 查詢冰箱食材</h2>
+        <form method="GET" class="search-box">
+            <input type="text" name="search" placeholder="輸入食物名稱關鍵字..." value="{{ search_query }}">
+            <button type="submit" class="btn-search">搜尋</button>
+            {% if search_query %}
+                <a href="/" style="margin-left: 10px; color: #666; text-decoration: none;">❌ 清除</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <h2>📋 目前冰箱庫存 (⚠️ 依過期日由近到遠排序)</h2>
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>食物</th>
+                    <th>效期</th>
+                    <th>數量</th>
+                    <th>剩餘</th>
+                    <th>狀態</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for food in foods %}
+                <tr class="{% if food.status == 'expired' %}danger-row{% elif food.status == 'warning' %}warning-row{% endif %}">
+                    <td>{{ food.name }}</td>
+                    <td>{{ food.expiry }}</td>
+                    <td>{{ food.qty }} 個</td>
+                    <td>
+                        {% if food.days_left < 0 %}
+                            過期 {{ food.days_left | abs }} 天
+                        {% else %}
+                            {{ food.days_left }} 天
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if food.status == 'expired' %}
+                            ❌ 已過期！扔了它
+                        {% elif food.status == 'warning' %}
+                            ⚠️ 趕快吃
+                        {% else %}
+                            ✅ 安全
+                        {% endif %}
+                    </td>
+                    <td>
+                        <form action="/minus_custom/{{ food.id }}" method="POST" class="minus-form">
+                            <input type="number" name="minus_qty" class="input-minus" value="0.25" step="any" min="0.01" required>
+                            <button type="submit" class="btn-minus">吃掉</button>
+                        </form>
+                        <a href="/delete/{{ food.id }}"><button class="btn-delete">刪除</button></a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+    function setExpiryDays(days, defaultName) {
+        var today = new Date();
+        today.setDate(today.getDate() + days);
+        var yyyy = today.getFullYear();
+        var mm = String(today.getMonth() + 1).padStart(2, '0');
+        var dd = String(today.getDate()).padStart(2, '0');
+        document.getElementById('expiry_date').value = yyyy + '-' + mm + '-' + dd;
+        document.getElementById('food_name').value = defaultName;
+    }
+    </script>
+</body>
+</html>
