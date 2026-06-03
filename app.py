@@ -3,9 +3,9 @@ import datetime
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 
 app = Flask(__name__)
-DB_PATH = 'my_fridge.db' # 💡 遷移到雲端平台，改用本地資料庫路徑
+DB_PATH = 'my_fridge.db'
 
-# 初始資料庫
+# 💡 確保一開機就建立資料庫與資料表
 def init_db():
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
@@ -100,6 +100,7 @@ def index():
 
     return render_template("index.html", foods=processed_foods, search_query=search_query)
 
+# 💡 關鍵：確保 init_db() 在最外面，開機時一定會先執行
 init_db()
 
 if __name__ == "__main__":
