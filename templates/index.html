@@ -12,11 +12,15 @@
         .form-box { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         input { margin: 5px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 90%; max-width: 300px; }
         button { padding: 8px 15px; background-color: #2ec4b6; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        .guide-section { background-color: #f8f9fa; padding: 12px; border-radius: 6px; margin: 10px 0; border-left: 4px solid #2ec4b6; }
-        .guide-title { font-weight: bold; font-size: 14px; color: #495057; margin-bottom: 5px; }
-        .btn-quick { background-color: #ffffff; color: #00796b; border: 1px solid #b2dfdb; padding: 5px 10px; font-size: 12px; margin-right: 4px; margin-bottom: 4px; border-radius: 4px; cursor: pointer; }
-        .btn-quick:active { background-color: #e0f2f1; }
-        .btn-freeze { color: #0077b6; border-color: #90e0ef; }
+        
+        /* 🎨 終極卡片式 UI 樣式對齊 */
+        .guide-container { display: flex; flex-direction: column; gap: 15px; margin: 15px 0; }
+        .guide-card { background-color: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 5px solid #2ec4b6; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .card-title { font-weight: bold; font-size: 16px; color: #333; margin-bottom: 10px; display: flex; align-items: center; gap: 5px; }
+        .btn-group { display: flex; flex-wrap: wrap; gap: 8px; }
+        .btn-quick { background-color: #ffffff; color: #00796b; border: 1px solid #b2dfdb; padding: 8px 14px; font-size: 13px; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
+        .btn-quick:active { background-color: #e0f2f1; transform: scale(0.98); }
+        
         .minus-form { display: inline-flex; align-items: center; }
         .input-minus { width: 60px !important; margin: 0 5px 0 0; padding: 4px; text-align: center; }
         .btn-minus { background-color: #f77f00; padding: 5px 10px; font-size: 12px; }
@@ -35,31 +39,48 @@
     
     <div class="form-box">
         <h2>➕ 新增食材資訊</h2>
-        <div class="quick-btn-group">
-            <span style="font-size: 14px; color: #666;">💡 沒有寫效期？點擊自動估算：</span><br>
-            <button type="button" class="btn-quick" onclick="setExpiryDays(2, '生鮮肉品/海鮮(冷藏)')">冷藏 (2天)</button>
-            <button type="button" class="btn-quick btn-freeze" onclick="setExpiryDays(180, '牛/豬肉排(冷凍)')">肉排冷凍 (6個月)</button>
-            <button type="button" class="btn-quick btn-freeze" onclick="setExpiryDays(60, '絞肉/海鮮(冷凍)')">絞肉/海鮮冷凍 (2個月)</button>
+        
+        <div style="font-size: 14px; color: #666; margin-bottom: 10px;">💡 點擊下方食材種類，自動估算有效期限：</div>
+        
+        <div class="guide-container">
+            <div class="guide-card" style="border-left-color: #e63946;">
+                <div class="card-title">🥩 肉品與海鮮類</div>
+                <div class="btn-group">
+                    <button type="button" class="btn-quick" onclick="setExpiryDays(2, '生鮮肉品/海鮮(冷藏)')">冷藏 (2天)</button>
+                    <button type="button" class="btn-quick" onclick="setExpiryDays(180, '牛、豬肉排(冷凍)')">肉排冷凍 (6個月)</button>
+                    <button type="button" class="btn-quick" onclick="setExpiryDays(60, '絞肉/海鮮(冷凍)')">絞肉/海鮮冷凍 (2個月)</button>
+                </div>
+            </div>
+
+            <div class="guide-card" style="border-left-color: #2ec4b6;">
+                <div class="card-title">🥬 蔬菜與水果類</div>
+                <div class="btn-group">
+                    <button type="button" class="btn-quick" onclick="setExpiryDays(7, '葉菜類')">葉菜類 (1星期)</button>
+                    <button type="button" class="btn-quick" onclick="setExpiryDays(30, '根莖/高麗菜/洋蔥')">根莖/高麗菜/洋蔥 (1個月)</button>
+                </div>
+            </div>
+
+            <div class="guide-card" style="border-left-color: #4cc9f0;">
+                <div class="card-title">🥛 乳品與蛋類</div>
+                <div class="btn-group">
+                    <button type="button" class="btn-quick" onclick="setExpiryDays(10, '鮮乳')">鮮乳 (約10天)</button>
+                    <button type="button" class="btn-quick" onclick="setExpiryDays(28, '雞蛋')">雞蛋 (約4週)</button>
+                </div>
+            </div>
+
+            <div class="guide-card" style="border-left-color: #7209b7;">
+                <div class="card-title">🍱 熟食與隔夜菜</div>
+                <div class="btn-group">
+                    <button type="button" class="btn-quick" onclick="setExpiryDays(3, '熟食隔夜菜')">冷藏保存 (3天)</button>
+                </div>
+            </div>
         </div>
-        <div class="guide-section">
-            <div class="guide-title">🥬 蔬菜與水果類</div>
-            <button type="button" class="btn-quick" onclick="setExpiryDays(7, '葉菜類')">葉菜類 (1星期)</button>
-            <button type="button" class="btn-quick" onclick="setExpiryDays(30, '根莖類蔬菜')">根莖/高麗菜/洋蔥 (1個月)</button>
-        </div>
-        <div class="guide-section">
-            <div class="guide-title">🥛 乳品與蛋類</div>
-            <button type="button" class="btn-quick" onclick="setExpiryDays(10, '鮮乳')">鮮乳 (約10天)</button>
-            <button type="button" class="btn-quick" onclick="setExpiryDays(28, '雞蛋')">雞蛋 (約4週)</button>
-        </div>
-        <div class="guide-section">
-            <div class="guide-title">🍱 熟食與隔夜菜</div>
-            <button type="button" class="btn-quick" onclick="setExpiryDays(3, '熟食隔夜菜')">冷藏保存 (3天)</button>
-        </div>
-        <form method="POST" style="margin-top: 15px;">
+
+        <form method="POST" style="margin-top: 20px;">
             <input type="text" name="food_name" id="food_name" placeholder="食物名稱 (可手動修改)" required><br>
             <input type="date" name="expiry_date" id="expiry_date" required><br>
             <input type="number" name="quantity" placeholder="數量 (如：1 或 0.5)" step="any" min="0.01" required><br>
-            <button type="submit">存入冰箱</button>
+            <button type="submit" style="width: 90%; max-width: 320px; font-weight: bold; margin-top: 10px;">確認存入冰箱</button>
         </form>
     </div>
 
