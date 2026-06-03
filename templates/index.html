@@ -13,13 +13,15 @@
         input { margin: 5px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 90%; max-width: 300px; }
         button { padding: 8px 15px; background-color: #2ec4b6; color: white; border: none; border-radius: 4px; cursor: pointer; }
         
-        /* 🎨 終極卡片式 UI 樣式對齊 */
+        /* 🔒 房間登入框樣式 */
+        .room-box { background: #343a40; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+        .room-input { width: 150px !important; margin: 0 !important; background: #495057; color: white; border: none; }
+        
         .guide-container { display: flex; flex-direction: column; gap: 15px; margin: 15px 0; }
-        .guide-card { background-color: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 5px solid #2ec4b6; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .card-title { font-weight: bold; font-size: 16px; color: #333; margin-bottom: 10px; display: flex; align-items: center; gap: 5px; }
+        .guide-card { background-color: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 5px solid #2ec4b6; }
+        .card-title { font-weight: bold; font-size: 16px; color: #333; margin-bottom: 10px; }
         .btn-group { display: flex; flex-wrap: wrap; gap: 8px; }
-        .btn-quick { background-color: #ffffff; color: #00796b; border: 1px solid #b2dfdb; padding: 8px 14px; font-size: 13px; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
-        .btn-quick:active { background-color: #e0f2f1; transform: scale(0.98); }
+        .btn-quick { background-color: #ffffff; color: #00796b; border: 1px solid #b2dfdb; padding: 8px 14px; font-size: 13px; border-radius: 6px; cursor: pointer; }
         
         .minus-form { display: inline-flex; align-items: center; }
         .input-minus { width: 60px !important; margin: 0 5px 0 0; padding: 4px; text-align: center; }
@@ -36,9 +38,18 @@
 </head>
 <body>
     <h1>🧊 「再不吃就別吃了」冰箱儀表板</h1>
+
+    <div class="room-box">
+        <span>🔒 當前冰箱房間密碼：</span>
+        <form method="GET" style="display: inline-flex; gap: 5px; align-items: center; width: auto;">
+            <input type="text" name="room" class="room-input" value="{{ current_room }}" required>
+            <button type="submit" style="background-color: #4cc9f0; padding: 6px 12px; font-size: 13px;">切換/登入房間</button>
+        </form>
+        <span style="font-size: 12px; color: #ced4da;">(輸入相同密碼的組員，即可共享同一個冰箱！)</span>
+    </div>
     
     <div class="form-box">
-        <h2>➕ 新增食材資訊</h2>
+        <h2>➕ 新增食材資訊 (🚪 正在存入房間：{{ current_room }})</h2>
         
         <div style="font-size: 14px; color: #666; margin-bottom: 10px;">💡 點擊下方食材種類，自動估算有效期限：</div>
         
@@ -51,7 +62,6 @@
                     <button type="button" class="btn-quick" onclick="setExpiryDays(60, '絞肉/海鮮(冷凍)')">絞肉/海鮮冷凍 (2個月)</button>
                 </div>
             </div>
-
             <div class="guide-card" style="border-left-color: #2ec4b6;">
                 <div class="card-title">🥬 蔬菜與水果類</div>
                 <div class="btn-group">
@@ -59,7 +69,6 @@
                     <button type="button" class="btn-quick" onclick="setExpiryDays(30, '根莖/高麗菜/洋蔥')">根莖/高麗菜/洋蔥 (1個月)</button>
                 </div>
             </div>
-
             <div class="guide-card" style="border-left-color: #4cc9f0;">
                 <div class="card-title">🥛 乳品與蛋類</div>
                 <div class="btn-group">
@@ -67,7 +76,6 @@
                     <button type="button" class="btn-quick" onclick="setExpiryDays(28, '雞蛋')">雞蛋 (約4週)</button>
                 </div>
             </div>
-
             <div class="guide-card" style="border-left-color: #7209b7;">
                 <div class="card-title">🍱 熟食與隔夜菜</div>
                 <div class="btn-group">
@@ -79,7 +87,7 @@
         <form method="POST" style="margin-top: 20px;">
             <input type="text" name="food_name" id="food_name" placeholder="食物名稱 (可手動修改)" required><br>
             <input type="date" name="expiry_date" id="expiry_date" required><br>
-            <input type="number" name="quantity" placeholder="數量 (如：1 或 0.5)" step="any" min="0.01" required><br>
+            <input type="number" name="quantity" placeholder="數量" step="any" min="0.01" required><br>
             <button type="submit" style="width: 90%; max-width: 320px; font-weight: bold; margin-top: 10px;">確認存入冰箱</button>
         </form>
     </div>
@@ -87,15 +95,16 @@
     <div class="form-box">
         <h2>🔍 查詢冰箱食材</h2>
         <form method="GET" class="search-box">
+            <input type="hidden" name="room" value="{{ current_room }}">
             <input type="text" name="search" placeholder="輸入食物名稱關鍵字..." value="{{ search_query }}">
             <button type="submit" class="btn-search">搜尋</button>
             {% if search_query %}
-                <a href="/" style="margin-left: 10px; color: #666; text-decoration: none;">❌ 清除</a>
+                <a href="/?room={{ current_room }}" style="margin-left: 10px; color: #666; text-decoration: none;">❌ 清除</a>
             {% endif %}
         </form>
     </div>
 
-    <h2>📋 目前冰箱庫存 (⚠️ 依過期日由近到遠排序)</h2>
+    <h2>📋 目前冰箱庫存 (🚪 房間：{{ current_room }})</h2>
     <div style="overflow-x: auto;">
         <table>
             <thead>
@@ -131,11 +140,11 @@
                         {% endif %}
                     </td>
                     <td>
-                        <form action="/minus_custom/{{ food.id }}" method="POST" class="minus-form">
+                        <form action="/minus_custom/{{ food.id }}?room={{ current_room }}" method="POST" class="minus-form">
                             <input type="number" name="minus_qty" class="input-minus" value="0.25" step="any" min="0.01" required>
                             <button type="submit" class="btn-minus">吃掉</button>
                         </form>
-                        <a href="/delete/{{ food.id }}"><button class="btn-delete">刪除</button></a>
+                        <a href="/delete/{{ food.id }}?room={{ current_room }}"><button class="btn-delete">刪除</button></a>
                     </td>
                 </tr>
                 {% endfor %}
